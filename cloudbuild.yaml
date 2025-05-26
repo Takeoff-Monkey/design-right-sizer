@@ -1,0 +1,24 @@
+steps:
+  # Step 1: Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-east1-docker.pkg.dev/733054955978/design-right-sizer/slack-app', '.']
+
+  # Step 2: Push the image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-east1-docker.pkg.dev/733054955978/design-right-sizer/slack-app']
+
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - slack-app
+      - --image=us-east1-docker.pkg.dev/733054955978/design-right-sizer/slack-app
+      - --region=us-east1
+      - --platform=managed
+      - --allow-unauthenticated
+      - --set-secrets=SLACK_APP_TOKEN=projects/733054955978/secrets/SLACK_APP_TOKEN:latest,SLACK_BOT_TOKEN=projects/733054955978/secrets/SLACK_BOT_TOKEN:latest
+
+images:
+  - 'us-east1-docker.pkg.dev/733054955978/design-right-sizer/slack-app'
